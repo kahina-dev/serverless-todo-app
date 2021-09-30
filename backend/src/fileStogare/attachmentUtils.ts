@@ -3,7 +3,7 @@ import * as AWSXRay from 'aws-xray-sdk'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
-export class FileStorage{
+export class AttachementUtils{
 
     constructor(
         private readonly s3 = new XAWS.S3({
