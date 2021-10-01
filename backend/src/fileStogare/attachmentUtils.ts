@@ -1,8 +1,9 @@
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
+import { createLogger } from '../utils/logger'
 
 const XAWS = AWSXRay.captureAWS(AWS)
-
+const logger = createLogger('AttachmentUtils')
 export class AttachmentUtils{
 
     constructor(
@@ -12,12 +13,15 @@ export class AttachmentUtils{
         private readonly urlExpiration = process.env.SIGNED_URL_EXPIRATION) { }
 
         async getUploadUrl(todoId: string): Promise<string> {
-            console.log(`Generating upload URL`)
+            logger.info(`Generating upload URL`)
             return this.s3.getSignedUrl('putObject', {
               Bucket: this.bucketName,
               Key: todoId,
               Expires: this.urlExpiration
-            })
-            
+            })        
+          }
+
+          async getUrl(todoId: string): Promise<string> {
+              return `https://${this.bucketName}.s3.amazonaws.com/${todoId}`
           }
 }

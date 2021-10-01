@@ -60,7 +60,7 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const token = getToken(authHeader)
   const jwt: Jwt = decode(token, { complete: true }) as Jwt
 
-  logger.info(`Retreiving certificate from ${jwksUrl}`)
+  logger.info(`Retreiving publicKey from ${jwksUrl}`)
   const kid = jwt.header.kid
   const client = jwksClient({
     jwksUri: jwksUrl

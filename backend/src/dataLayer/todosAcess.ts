@@ -18,7 +18,7 @@ export class TodosAccess{
     private readonly todosTable = process.env.TODOS_TABLE) { }
 
     async getAllTodos(userId: string): Promise<TodoItem[]> {
-        console.log(`Getting all todos for user ${userId}`)
+        logger.info(`Getting all todos for user ${userId}`)
     
         const result = await this.docClient.query({
           TableName: this.todosTable,
@@ -34,7 +34,7 @@ export class TodosAccess{
       }
 
       async getTodo(userId: string, todoId: string):Promise<TodoItem> {
-        console.log(`Getting todo item with ID #${todoId}`)
+        logger.info(`Getting todo item with ID #${todoId}`)
         const result = await this.docClient.get({
             TableName: this.todosTable,
             Key: {
@@ -48,18 +48,18 @@ export class TodosAccess{
       }
 
       async createTodo(todoItem: TodoItem):Promise<TodoItem>{
-        console.log(`Creating a new todo item`)
+        logger.info(`Creating a new todo item`)
         const result = await this.docClient.put({
             TableName: this.todosTable,
             Item: todoItem
           }).promise()
-      
-          const item = result.Item
+          
+          const item = result.Attributes
           return item as TodoItem
         }
 
-        async updateTodo(userId: string, todoId: string, todoUpdate: TodoUpdate):Promise<TodoItem>{
-            console.log(`Updating todo item having ID #${todoId} for user #${userId}`)
+        async updateTodo(userId: string, todoId: string, todoUpdate: TodoUpdate):Promise<TodoUpdate>{
+            logger.info(`Updating todo item having ID #${todoId} for user #${userId}`)
             const result = await this.docClient.update({
                 TableName: this.todosTable,
                 Key: {
@@ -73,12 +73,12 @@ export class TodosAccess{
                     ":done":todoUpdate.done
                 }
             }).promise()
-            const item = result.Item
-            return item as TodoItem
+            const item = result.Attributes
+            return item as TodoUpdate
             }
       
             async deleteTodo(userId: string, todoId: string){
-            console.log(`Deleting todo item having ID #${todoId} for user #${userId}`)
+             logger.info(`Deleting todo item having ID #${todoId} for user #${userId}`)
               await this.docClient.delete({
                   TableName: this.todosTable,
                   Key: {
