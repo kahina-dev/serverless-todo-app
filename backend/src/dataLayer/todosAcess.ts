@@ -15,13 +15,15 @@ export class TodosAccess{
 
     constructor(
         private readonly docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient(),
-    private readonly todosTable = process.env.TODOS_TABLE) { }
+        private readonly todosTable = process.env.TODOS_TABLE,
+        private readonly todoIndex=process.env.TODOS_CREATED_AT_INDEX) { }
 
     async getAllTodos(userId: string): Promise<TodoItem[]> {
         logger.info(`Getting all todos for user ${userId}`)
     
         const result = await this.docClient.query({
           TableName: this.todosTable,
+          IndexName : this.todoIndex,
           KeyConditionExpression: 'userId = :userId',
           ExpressionAttributeValues: {
           ':userId': userId
@@ -49,32 +51,36 @@ export class TodosAccess{
 
       async createTodo(todoItem: TodoItem):Promise<TodoItem>{
         logger.info(`Creating a new todo item`)
-        const result = await this.docClient.put({
+         await this.docClient.put({
             TableName: this.todosTable,
             Item: todoItem
           }).promise()
           
-          const item = result.Attributes
-          return item as TodoItem
+          return todoItem
         }
 
         async updateTodo(userId: string, todoId: string, todoUpdate: TodoUpdate):Promise<TodoUpdate>{
             logger.info(`Updating todo item having ID #${todoId} for user #${userId}`)
-            const result = await this.docClient.update({
+            await this.docClient.update({
                 TableName: this.todosTable,
                 Key: {
                   userId,
                   todoId
                 },
-                UpdateExpression: "set name = :name, dueDate=:dueDate, done=:done",
+                UpdateExpression: "set #dn=:dn, #dd=:dd, #n=:n",
                 ExpressionAttributeValues:{
-                    ":name":todoUpdate.name,
-                    ":dueDate":todoUpdate.dueDate,
-                    ":done":todoUpdate.done
-                }
+                    ":dn":todoUpdate.done,
+                    ":n":todoUpdate.name,
+                    ":dd":todoUpdate.dueDate
+                },
+                ExpressionAttributeNames: {
+                "#n": "name",
+                "#dd": "dueDate",
+                "#dn": "done",
+             }
             }).promise()
-            const item = result.Attributes
-            return item as TodoUpdate
+            
+            return todoUpdate
             }
       
             async deleteTodo(userId: string, todoId: string){
